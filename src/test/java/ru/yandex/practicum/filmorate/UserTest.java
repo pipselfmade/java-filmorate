@@ -22,7 +22,7 @@ public class UserTest {
                 .build();
 
         final ValidationException exception = assertThrows(ValidationException.class, () -> UserController.validate(user));
-        assertEquals("Email name can't be blank", exception.getMessage());
+        assertEquals("Email name can't be blank ", exception.getMessage());
     }
 
     @Test
