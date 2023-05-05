@@ -57,6 +57,7 @@ public class FilmController {
     public List<Film> getMostLikedFilms(@RequestParam(required = false, defaultValue = "10") Integer count) {
         return service.getMostLikedFilms(count);
     }
+
     public static void validate(Film film) {
         if (StringUtils.isBlank(film.getName())) {
             log.error("Validation error: Films name can't be blank");
