@@ -2,11 +2,14 @@ package ru.yandex.practicum.filmorate.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.ObjectNotFoundException;
+import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.UserStorage;
 
+import java.time.LocalDate;
 import java.util.*;
 
 @Service
@@ -16,13 +19,13 @@ public class UserService {
     private final UserStorage userStorage;
 
     public User createUser(User user) {
-        log.info("User '" + user.getName() + "' created successfully");
+        validate(user);
         return userStorage.createUser(user);
     }
 
     public User updateUser(User user) {
         Optional<User> optionalUser = userStorage.updateUser(user);
-
+        validate(user);
         if (optionalUser.isEmpty()) {
             log.error("Incorrect ID error: User with this ID does not exist when updating");
             throw new ObjectNotFoundException("User with this ID does not exist when updating");
@@ -110,5 +113,36 @@ public class UserService {
 
         log.info("Common friends returned successfully");
         return commonFriends;
+    }
+
+    public static void validate(User user) {
+        if (StringUtils.isBlank(user.getName())) {
+            user.setName(user.getLogin());
+        }
+
+        if (user.getEmail().isBlank()) {
+            log.error("Validation error: Email name can't be blank");
+            throw new ValidationException("Email name can't be blank");
+        }
+
+        if (!user.getEmail().contains("@")) {
+            log.error("Validation error: Email name should contain '@'");
+            throw new ValidationException("Email name should contain '@'");
+        }
+
+        if (user.getLogin().isBlank()) {
+            log.error("Validation error: Login can't be blank");
+            throw new ValidationException("Login can't be blank");
+        }
+
+        if (user.getLogin().contains(" ")) {
+            log.error("Validation error: Login can't contain spaces");
+            throw new ValidationException("Login can't contain spaces");
+        }
+
+        if (user.getBirthday().isAfter(LocalDate.now())) {
+            log.error("Validation error: Users birthday can't be in the future");
+            throw new ValidationException("Users birthday can't be in the future");
+        }
     }
 }

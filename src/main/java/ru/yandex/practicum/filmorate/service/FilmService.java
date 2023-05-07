@@ -2,13 +2,16 @@ package ru.yandex.practicum.filmorate.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.ObjectNotFoundException;
+import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.UserStorage;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -22,13 +25,13 @@ public class FilmService {
     private final UserStorage userStorage;
 
     public Film addFilm(Film film) {
-        log.info("Film '" + film.getName() + "' added successfully");
+        validate(film);
         return filmStorage.addFilm(film);
     }
 
     public Film updateFilm(Film film) {
         Optional<Film> optionalFilm = filmStorage.updateFilm(film);
-
+        validate(film);
         if (optionalFilm.isEmpty()) {
             log.error("Incorrect ID error: Film with this ID does not exist when updating");
             throw new ObjectNotFoundException("Film with this ID does not exist when updating");
@@ -95,5 +98,27 @@ public class FilmService {
 
     private int compare(Film f0, Film f1) {
         return -1 * (f0.getLikesIds().size() - f1.getLikesIds().size());
+    }
+
+    public static void validate(Film film) {
+        if (StringUtils.isBlank(film.getName())) {
+            log.error("Validation error: Films name can't be blank");
+            throw new ValidationException("Films name can't be blank");
+        }
+
+        if (film.getDescription().length() > 200) {
+            log.error("Validation error: Films description can't be longer than 200 chars");
+            throw new ValidationException("Films description can't be longer than 200 chars");
+        }
+
+        if (film.getReleaseDate().isBefore(LocalDate.of(1895, 12, 28))) {
+            log.error("Validation error: Films release date can't be before 28.12.1895");
+            throw new ValidationException("Films release date can't be before 28.12.1895");
+        }
+
+        if (film.getDuration() < 0) {
+            log.error("Validation error: Films duration can't be negative");
+            throw new ValidationException("Films duration can't be negative");
+        }
     }
 }
