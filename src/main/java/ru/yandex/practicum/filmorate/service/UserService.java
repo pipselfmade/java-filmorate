@@ -99,16 +99,20 @@ public class UserService {
     }
 
 
-    public Set<Integer> getCommonFriendsIds(Integer userId, Integer otherUserId) {
+    /*public Set<User> getCommonFriendsIds(Integer userId, Integer otherUserId) {
         User user = getUserById(userId);
         User otherUser = getUserById(otherUserId);
-        Set<Integer> commonFriends = user.getFriendsIds();
-        commonFriends.retainAll(otherUser.getFriendsIds());
+        Set<Integer> commonFriendsIds = user.getFriendsIds();
+        commonFriendsIds.retainAll(otherUser.getFriendsIds());
+        Set<User> commonFriends = new HashSet<>();
+        for (var commonFriendId : commonFriendsIds) {
+            commonFriends.add(getUserById(commonFriendId));
+        }
         log.info("Common friends returned successfully");
         return commonFriends;
-    }
+    }*/
 
-    /*public Set<User> getCommonFriendsIds(Integer userId, Integer otherUserId) {
+    public Set<User> getCommonFriendsIds(Integer userId, Integer otherUserId) {
         User user = getUserById(userId);
         User otherUser = getUserById(otherUserId);
         Set<User> commonFriends = new HashSet<>();
@@ -122,7 +126,7 @@ public class UserService {
         }
         log.info("Common friends returned successfully");
         return commonFriends;
-    }*/
+    }
 
     public static void validate(User user) {
         if (StringUtils.isBlank(user.getName())) {
