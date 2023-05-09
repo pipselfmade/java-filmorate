@@ -119,7 +119,6 @@ public class UserService {
                 }
             }
         }
-
         log.info("Common friends returned successfully");
         return commonFriends;
     }*/
