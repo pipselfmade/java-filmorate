@@ -98,10 +98,10 @@ public class UserService {
         return users;
     }
 
-    public Set<Integer> getCommonFriendsIds(Integer userId, Integer otherUserId) {
+    public Set<User> getCommonFriendsIds(Integer userId, Integer otherUserId) {
         User user = getUserById(userId);
         User otherUser = getUserById(otherUserId);
-        Set<Integer> commonFriends = user.getFriendsIds();
+        Set<User> commonFriends = new HashSet<>();
         commonFriends.retainAll(otherUser.getFriendsIds());
         log.info("Common friends returned successfully");
         return commonFriends;
