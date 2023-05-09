@@ -102,7 +102,7 @@ public class UserService {
     public Set<Integer> getCommonFriendsIds(Integer userId, Integer otherUserId) {
         User user = getUserById(userId);
         User otherUser = getUserById(otherUserId);
-        Set<Integer> commonFriends = new HashSet<>();
+        Set<Integer> commonFriends = user.getFriendsIds();
         commonFriends.retainAll(otherUser.getFriendsIds());
         log.info("Common friends returned successfully");
         return commonFriends;
