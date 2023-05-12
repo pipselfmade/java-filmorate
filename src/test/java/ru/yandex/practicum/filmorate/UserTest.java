@@ -2,13 +2,14 @@ package ru.yandex.practicum.filmorate;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
-import ru.yandex.practicum.filmorate.controllers.UserController;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.service.UserService;
 
 import java.time.LocalDate;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @SpringBootTest
 public class UserTest {
@@ -21,7 +22,7 @@ public class UserTest {
                 .birthday(LocalDate.of(2003, 2, 14))
                 .build();
 
-        final ValidationException exception = assertThrows(ValidationException.class, () -> UserController.validate(user));
+        final ValidationException exception = assertThrows(ValidationException.class, () -> UserService.validate(user));
         assertEquals("Email name can't be blank", exception.getMessage());
     }
 
@@ -34,7 +35,7 @@ public class UserTest {
                 .birthday(LocalDate.of(2003, 2, 14))
                 .build();
 
-        final ValidationException exception = assertThrows(ValidationException.class, () -> UserController.validate(user));
+        final ValidationException exception = assertThrows(ValidationException.class, () -> UserService.validate(user));
         assertEquals("Email name should contain '@'", exception.getMessage());
     }
 
@@ -47,7 +48,7 @@ public class UserTest {
                 .birthday(LocalDate.of(2003, 2, 14))
                 .build();
 
-        final ValidationException exception = assertThrows(ValidationException.class, () -> UserController.validate(user));
+        final ValidationException exception = assertThrows(ValidationException.class, () -> UserService.validate(user));
         assertEquals("Login can't be blank", exception.getMessage());
     }
 
@@ -60,7 +61,7 @@ public class UserTest {
                 .birthday(LocalDate.of(2003, 2, 14))
                 .build();
 
-        final ValidationException exception = assertThrows(ValidationException.class, () -> UserController.validate(user));
+        final ValidationException exception = assertThrows(ValidationException.class, () -> UserService.validate(user));
         assertEquals("Login can't contain spaces", exception.getMessage());
     }
 
@@ -73,7 +74,7 @@ public class UserTest {
                 .birthday(LocalDate.of(2024, 2, 14))
                 .build();
 
-        final ValidationException exception = assertThrows(ValidationException.class, () -> UserController.validate(user));
+        final ValidationException exception = assertThrows(ValidationException.class, () -> UserService.validate(user));
         assertEquals("Users birthday can't be in the future", exception.getMessage());
     }
 
@@ -85,7 +86,7 @@ public class UserTest {
                 .birthday(LocalDate.of(2003, 2, 14))
                 .build();
 
-        UserController.validate(user);
+        UserService.validate(user);
         assertEquals("1", user.getName());  // name = login when name == null
     }
 
@@ -98,7 +99,7 @@ public class UserTest {
                 .birthday(LocalDate.of(2003, 2, 14))
                 .build();
 
-        UserController.validate(user);
+        UserService.validate(user);
         assertEquals("1", user.getName());  // name = login when name == null
     }
 }

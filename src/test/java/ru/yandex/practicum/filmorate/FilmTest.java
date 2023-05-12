@@ -2,13 +2,14 @@ package ru.yandex.practicum.filmorate;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
-import ru.yandex.practicum.filmorate.controllers.FilmController;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.service.FilmService;
 
 import java.time.LocalDate;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @SpringBootTest
 public class FilmTest {
@@ -23,7 +24,7 @@ public class FilmTest {
                 .duration(1)
                 .build();
 
-        final ValidationException exception = assertThrows(ValidationException.class, () -> FilmController.validate(film));
+        final ValidationException exception = assertThrows(ValidationException.class, () -> FilmService.validate(film));
         assertEquals("Films name can't be blank", exception.getMessage());
     }
 
@@ -36,7 +37,7 @@ public class FilmTest {
                 .duration(1)
                 .build();
 
-        final ValidationException exception = assertThrows(ValidationException.class, () -> FilmController.validate(film));
+        final ValidationException exception = assertThrows(ValidationException.class, () -> FilmService.validate(film));
         assertEquals("Films description can't be longer than 200 chars", exception.getMessage());
     }
 
@@ -49,9 +50,10 @@ public class FilmTest {
                 .duration(1)
                 .build();
 
-        final ValidationException exception = assertThrows(ValidationException.class, () -> FilmController.validate(film));
+        final ValidationException exception = assertThrows(ValidationException.class, () -> FilmService.validate(film));
         assertEquals("Films release date can't be before 28.12.1895", exception.getMessage());
     }
+
 
     @Test
     public void test_false_incorrectDuration() {
@@ -62,7 +64,7 @@ public class FilmTest {
                 .duration(-1)
                 .build();
 
-        final ValidationException exception = assertThrows(ValidationException.class, () -> FilmController.validate(film));
+        final ValidationException exception = assertThrows(ValidationException.class, () -> FilmService.validate(film));
         assertEquals("Films duration can't be negative", exception.getMessage());
     }
 }

@@ -1,83 +1,64 @@
 package ru.yandex.practicum.filmorate.controllers;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.web.bind.annotation.*;
-import ru.yandex.practicum.filmorate.exception.IncorrectIdException;
-import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.service.UserService;
 
 import javax.validation.Valid;
-import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
+import java.util.Set;
 
 @RestController
 @RequestMapping("/users")
+@RequiredArgsConstructor
 @Slf4j
 public class UserController {
-    private int id = 0;
-    private final Map<Integer, User> users = new HashMap<>();
+    private final UserService service;
 
     @PostMapping
-    private User createUser(@Valid @RequestBody User user) throws ValidationException {
-        validate(user);
-        user.setId(++id);
-        users.put(user.getId(), user);
+    private User createUser(@Valid @RequestBody User user) {
         log.info("User '" + user.getName() + "' created successfully");
-        return user;
+        return service.createUser(user);
     }
 
     @PutMapping
-    public User updateUser(@Valid @RequestBody User user) throws ValidationException, IncorrectIdException {
-        validate(user);
-
-        if (users.containsKey(user.getId())) {
-            users.put(user.getId(), user);
-            log.info("User '" + user.getName() + "' updated successfully");
-            return user;
-        } else {
-            log.error("Incorrect id");
-            throw new IncorrectIdException("Incorrect id");
-        }
+    public User updateUser(@Valid @RequestBody User user) {
+        log.info("Updating User Data: {}", user);
+        return service.updateUser(user);
     }
 
     @GetMapping
     public List<User> getAllUsers() {
-        return new ArrayList<>(users.values());
+        return service.getAllUsers();
     }
 
-    public static void validate(User user) {
-        if (StringUtils.isBlank(user.getName())) {
-        //if (user.getName() == null || user.getName().isBlank()) {
-            user.setName(user.getLogin());
-        }
+    @GetMapping("/{userId}")
+    public User getUserById(@PathVariable Integer userId) {
+        return service.getUserById(userId);
+    }
 
-        if (user.getEmail().isBlank()) {
-            log.error("Validation error: Email name can't be blank");
-            throw new ValidationException("Email name can't be blank");
-        }
+    @PutMapping("/{userId}/friends/{friendId}")
+    public void addFriend(@PathVariable Integer userId,
+                          @PathVariable Integer friendId) {
+        service.addFriend(userId, friendId);
+    }
 
-        if (!user.getEmail().contains("@")) {
-            log.error("Validation error: Email name should contain '@'");
-            throw new ValidationException("Email name should contain '@'");
-        }
+    @DeleteMapping("/{userId}/friends/{friendId}")
+    public void deleteFriend(@PathVariable Integer userId,
+                             @PathVariable Integer friendId) {
+        service.deleteFriend(userId, friendId);
+    }
 
-        if (user.getLogin().isBlank()) {
-            log.error("Validation error: Login can't be blank");
-            throw new ValidationException("Login can't be blank");
-        }
+    @GetMapping("/{userId}/friends")
+    public List<User> getAllFriends(@PathVariable Integer userId) {
+        return service.getAllFriends(userId);
+    }
 
-        if (user.getLogin().contains(" ")) {
-            log.error("Validation error: Login can't contain spaces");
-            throw new ValidationException("Login can't contain spaces");
-        }
-
-        if (user.getBirthday().isAfter(LocalDate.now())) {
-            log.error("Validation error: Users birthday can't be in the future");
-            throw new ValidationException("Users birthday can't be in the future");
-        }
+    @GetMapping("/{userId}/friends/common/{otherUserId}")
+    public Set<User> getCommonFriends(@PathVariable Integer userId,
+                                      @PathVariable Integer otherUserId) {
+        return service.getCommonFriendsIds(userId, otherUserId);
     }
 }
