@@ -12,8 +12,7 @@ import ru.yandex.practicum.filmorate.storage.LikeStorage;
 @Primary
 @RequiredArgsConstructor
 public class LikeDbStorage implements LikeStorage {
-    private final JdbcTemplate jdbcTemplate;
-    private final FilmStorage filmStorage;
+
 
     @Override
     public Film likeFilm(Integer filmId, Integer userId) {
