@@ -41,4 +41,14 @@ public class InMemoryFilmStorage implements FilmStorage {
 
         return Optional.of(films.get(id));
     }
+
+    @Override
+    public Optional<Film> deleteFilm(Integer filmId) {
+        return Optional.empty();
+    }
+
+    @Override
+    public List<Film> getMostPopularFilm(Integer count) {
+        return null;
+    }
 }
