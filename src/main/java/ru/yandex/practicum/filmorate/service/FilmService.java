@@ -10,6 +10,8 @@ import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.UserStorage;
+import ru.yandex.practicum.filmorate.storage.LikeStorage;
+
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -23,6 +25,8 @@ import java.util.stream.Collectors;
 public class FilmService {
     private final FilmStorage filmStorage;
     private final UserStorage userStorage;
+    private final LikeStorage likeStorage;
+
 
     public Film addFilm(Film film) {
         validate(film);
@@ -38,6 +42,20 @@ public class FilmService {
         }
 
         log.info("Film '" + film.getName() + "' updated successfully");
+        return optionalFilm.get();
+    }
+
+    public Film deleteFilm(Integer filmId) {
+        Film film = getFilmById(filmId);
+        Optional<Film> optionalFilm = filmStorage.deleteFilm(filmId);
+
+
+        if (optionalFilm.isEmpty()) {
+            log.debug("Incorrect ID error: Film with this ID does not exist when deleting");
+            throw new ObjectNotFoundException("Film with this ID does not exist when deleting");
+        }
+
+        log.debug("Film '" + film.getName() + "' delete successfully");
         return optionalFilm.get();
     }
 
@@ -67,7 +85,7 @@ public class FilmService {
             throw new ObjectNotFoundException("User with this ID does not exist when liking film");
         }
 
-        film.getLikesIds().add(userId);
+        likeStorage.likeFilm(filmId, userId);
         log.info("Film with ID '" + filmId + "' successfully liked by user with ID '" + userId + "'");
         return film;
     }
@@ -80,27 +98,18 @@ public class FilmService {
             throw new ObjectNotFoundException("Film '" + film + "' has not likes from user with ID '" + userId + "' when unliking");
         }
 
-        film.getLikesIds().remove(userId);
+        likeStorage.unlikeFilm(filmId, userId);
         log.info("Film with id '" + filmId + "' successfully unliked by user with ID '" + userId + "'");
         return film;
     }
 
     public List<Film> getMostLikedFilms(Integer count) {
-        List<Film> films = new ArrayList<>(getAllFilms());
-
-        log.info("Most popular films returned successfully");
-        return films.stream()
-                .sorted(this::compare)
-                .skip(0)
-                .limit(count)
-                .collect(Collectors.toList());
+        return filmStorage.getMostPopularFilm(count);
     }
 
-    private int compare(Film f0, Film f1) {
-        return -1 * (f0.getLikesIds().size() - f1.getLikesIds().size());
-    }
 
     public static void validate(Film film) {
+
         if (StringUtils.isBlank(film.getName())) {
             log.error("Validation error: Films name can't be blank");
             throw new ValidationException("Films name can't be blank");
