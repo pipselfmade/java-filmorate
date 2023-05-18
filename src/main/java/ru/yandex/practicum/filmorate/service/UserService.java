@@ -8,7 +8,7 @@ import ru.yandex.practicum.filmorate.exception.ObjectNotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.UserStorage;
-
+import ru.yandex.practicum.filmorate.storage.FriendStorage;
 import java.time.LocalDate;
 import java.util.*;
 
@@ -17,6 +17,8 @@ import java.util.*;
 @Slf4j
 public class UserService {
     private final UserStorage userStorage;
+    private final FriendStorage friendStorage;
+
 
     public User createUser(User user) {
         validate(user);
@@ -34,6 +36,19 @@ public class UserService {
         log.info("User '" + user.getName() + "' updated successfully");
         return optionalUser.get();
     }
+
+    public User deleteUser(Integer userId) {
+        Optional<User> optionalUser = userStorage.deleteUser(userId);
+
+        if (optionalUser.isEmpty()) {
+            log.debug("Incorrect ID error: User with this ID does not exist when deleting");
+            throw new ObjectNotFoundException("User with this ID does not exist when deleting");
+        }
+
+        log.debug("User '" + getUserById(userId).getName() + "' delete successfully");
+        return optionalUser.get();
+    }
+
 
     public List<User> getAllUsers() {
         log.info("All users returned successfully");
@@ -61,10 +76,8 @@ public class UserService {
             throw new ObjectNotFoundException("Users do not exist when adding friend");
         }
 
-        user.getFriendsIds().add(friendId);
-        friend.getFriendsIds().add(userId);
+        friendStorage.addFriend(userId, friendId);
         log.info("Friend with ID '" + friendId + "' successfully added to user '" + userId + "'");
-        log.info("Friend with ID '" + userId + "' successfully added to user '" + friendId + "'");
     }
 
     public void deleteFriend(Integer userId, Integer friendId) {
@@ -80,51 +93,19 @@ public class UserService {
             throw new ObjectNotFoundException("User has not friend with id '" + friendId + "' when deleting friend");
         }
 
-        user.getFriendsIds().remove(friendId);
-        friend.getFriendsIds().remove(userId);
+        friendStorage.deleteFriend(userId, friendId);
         log.info("Friend with ID '" + friendId + "' successfully removed from user '" + userId + "' friends list");
-        log.info("Friend with ID '" + userId + "' successfully removed from user '" + friendId + "' friends list");
     }
 
     public List<User> getAllFriends(Integer userId) {
-        User user = getUserById(userId);
-        List<User> users = new ArrayList<>();
-
-        for (Integer friendsId : user.getFriendsIds()) {
-            users.add(getUserById(friendsId));
-        }
-
+        List<User> users = userStorage.getAllFriends(userId);
         log.info("All friends returned successfully");
         return users;
     }
 
-
-    /*public Set<User> getCommonFriendsIds(Integer userId, Integer otherUserId) {
-        User user = getUserById(userId);
-        User otherUser = getUserById(otherUserId);
-        Set<Integer> commonFriendsIds = user.getFriendsIds();
-        commonFriendsIds.retainAll(otherUser.getFriendsIds());
-        Set<User> commonFriends = new HashSet<>();
-        for (var commonFriendId : commonFriendsIds) {
-            commonFriends.add(getUserById(commonFriendId));
-        }
-        log.info("Common friends returned successfully");
-        return commonFriends;
-    }*/
-
     public Set<User> getCommonFriendsIds(Integer userId, Integer otherUserId) {
-        User user = getUserById(userId);
-        User otherUser = getUserById(otherUserId);
-        Set<User> commonFriends = new HashSet<>();
-
-        for (Integer idFriend : user.getFriendsIds()) {
-            for (Integer otherIdFriend : otherUser.getFriendsIds()) {
-                if (Objects.equals(idFriend, otherIdFriend)) {
-                    commonFriends.add(getUserById(idFriend));
-                }
-            }
-        }
-        log.info("Common friends returned successfully");
+        Set<User> commonFriends = userStorage.getCommonFriendsIds(userId, otherUserId);
+        log.debug("Common friends returned successfully");
         return commonFriends;
     }
 
